@@ -2,7 +2,7 @@ const EQUIPO = [
   { nombre: "Nikon D5600", tipo: "Cámara" },
   { nombre: "DJI RS 3 Mini", tipo: "Estabilizador" },
   { nombre: "Godox MS300", tipo: "Flash de estudio" },
-  { nombre: "DJI Mini", tipo: "Micrófonos" },
+  { nombre: "DJI Mic Mini", tipo: "Micrófonos" },
   { nombre: "DJI Mavic 3 Pro", tipo: "Dron" },
 ];
 

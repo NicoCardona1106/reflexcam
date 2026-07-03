@@ -43,6 +43,15 @@
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
   --radius: 0.25rem;
+
+  /* Carrusel de Últimos Trabajos: la pista contiene la lista duplicada,
+     así que -50% devuelve exactamente al punto de partida (loop invisible). */
+  --animate-marquee: marquee 45s linear infinite;
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
 }
 
 @utility text-headline-xl {

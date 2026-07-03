@@ -54,25 +54,31 @@ export default function UltimosTrabajos() {
           Últimos Trabajos
         </h2>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-gutter">
-          {TRABAJOS.map((t, i) => (
-            <div
-              key={i}
-              className="group relative aspect-[4/3] overflow-hidden rounded-lg bg-surface-container-low"
-            >
-              <Image
-                src={t.src}
-                alt={t.alt}
-                fill
-                sizes="(min-width: 768px) 25vw, 50vw"
-                priority={i === 0}
-                className="object-cover transition-transform duration-150 group-hover:scale-105"
-              />
-              <span className="absolute bottom-unit-sm left-unit-sm text-label-mono uppercase tracking-widest text-primary bg-surface-container-high/80 px-2 py-1 rounded">
-                {t.label}
-              </span>
-            </div>
-          ))}
+        <div className="overflow-hidden motion-reduce:overflow-x-auto">
+          <div className="flex w-max animate-marquee hover:[animation-play-state:paused] motion-reduce:animate-none">
+            {/* Lista duplicada para el loop infinito; la copia es decorativa */}
+            {[false, true].map((esCopia) =>
+              TRABAJOS.map((t, i) => (
+                <div
+                  key={`${esCopia}-${i}`}
+                  aria-hidden={esCopia || undefined}
+                  className="group relative aspect-[4/3] w-[70vw] sm:w-[45vw] md:w-[22rem] shrink-0 mr-gutter overflow-hidden rounded-lg bg-surface-container-low"
+                >
+                  <Image
+                    src={t.src}
+                    alt={esCopia ? "" : t.alt}
+                    fill
+                    sizes="(min-width: 768px) 352px, 70vw"
+                    priority={!esCopia && i === 0}
+                    className="object-cover transition-transform duration-150 group-hover:scale-105"
+                  />
+                  <span className="absolute bottom-unit-sm left-unit-sm text-label-mono uppercase tracking-widest text-primary bg-surface-container-high/80 px-2 py-1 rounded">
+                    {t.label}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </section>

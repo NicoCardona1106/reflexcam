@@ -22,6 +22,17 @@ const CELL_CROSSFADE_MS = 600;
 // servido (web/public/frames/119.webp).
 const SCREEN_RECT = { x0: 0.286, y0: 0.41, x1: 0.597, y1: 0.763 };
 
+// Color plano de fondo de la página (--color-background). Los frames del
+// video traen su propio fondo de estudio en degradado; se funden los bordes
+// de la imagen hacia este color para que el hero se vea de un solo color con
+// el resto de la página. Sobra cuando el video propio se grabe sobre fondo
+// plano #131313.
+const BG_RGB = "19, 19, 19";
+const EDGE_FADE_FRACTION = 0.16; // del lado menor de la imagen dibujada
+// Velo uniforme sobre el video para acercar su fondo de estudio (más claro)
+// al color de la página sin apagar la cámara. Calibrado visualmente.
+const DIM_ALPHA = 0.22;
+
 function easeInOutCubic(progress: number) {
   return progress < 0.5
     ? 4 * progress * progress * progress
@@ -135,6 +146,11 @@ export default function Hero() {
       );
       ctx.drawImage(baseImg, t.dx, t.dy, t.drawW, t.drawH);
 
+      // Velo antes del grid del LCD: atenúa el fondo de estudio del video
+      // sin apagar las fotos del portafolio.
+      ctx.fillStyle = `rgba(${BG_RGB}, ${DIM_ALPHA})`;
+      ctx.fillRect(t.dx, t.dy, t.drawW, t.drawH);
+
       if (state.showSlide) {
         const rectX = t.dx + SCREEN_RECT.x0 * t.drawW;
         const rectY = t.dy + SCREEN_RECT.y0 * t.drawH;
@@ -173,6 +189,33 @@ export default function Hero() {
 
           ctx.restore();
         });
+      }
+
+      fadeImageEdges(t);
+    }
+
+    // Degradados desde cada borde de la imagen hacia adentro, en el color
+    // plano de la página, para eliminar la costura entre el fondo de estudio
+    // del video y el fondo del sitio.
+    function fadeImageEdges(t: BaseTransform) {
+      const fade = Math.min(t.drawW, t.drawH) * EDGE_FADE_FRACTION;
+      const edges: [number, number, number, number][] = [
+        [t.dx, t.dy, t.dx, t.dy + fade], // superior
+        [t.dx, t.dy + t.drawH, t.dx, t.dy + t.drawH - fade], // inferior
+        [t.dx, t.dy, t.dx + fade, t.dy], // izquierdo
+        [t.dx + t.drawW, t.dy, t.dx + t.drawW - fade, t.dy], // derecho
+      ];
+      for (const [x0, y0, x1, y1] of edges) {
+        const g = ctx.createLinearGradient(x0, y0, x1, y1);
+        g.addColorStop(0, `rgba(${BG_RGB}, 1)`);
+        g.addColorStop(1, `rgba(${BG_RGB}, 0)`);
+        ctx.fillStyle = g;
+        const horizontal = y0 === y1;
+        if (horizontal) {
+          ctx.fillRect(Math.min(x0, x1), t.dy, fade, t.drawH);
+        } else {
+          ctx.fillRect(t.dx, Math.min(y0, y1), t.drawW, fade);
+        }
       }
     }
 
@@ -282,7 +325,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <main className="relative w-full h-screen flex items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_center,_#1a1a1a_0%,_#000000_100%)]">
+    <main className="relative w-full h-screen flex items-center justify-center overflow-hidden bg-background">
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full z-0"
