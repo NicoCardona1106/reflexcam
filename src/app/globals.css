@@ -24,7 +24,12 @@
   --color-background: #131313;
   --color-on-background: #e2e2e2;
 
-  --font-sans: var(--font-geist);
+  /* Acentos tomados del pico del águila del logo */
+  --color-accent: #ef8f10;
+  --color-accent-light: #f5a84b;
+  --color-accent-yellow: #f0b020;
+
+  --font-sans: var(--font-montserrat);
 
   /* Optical Precision — spacing (DESIGN.md) */
   --spacing-unit-xs: 4px;
@@ -43,15 +48,6 @@
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
   --radius: 0.25rem;
-
-  /* Carrusel de Últimos Trabajos: la pista contiene la lista duplicada,
-     así que -50% devuelve exactamente al punto de partida (loop invisible). */
-  --animate-marquee: marquee 45s linear infinite;
-  @keyframes marquee {
-    to {
-      transform: translateX(-50%);
-    }
-  }
 }
 
 @utility text-headline-xl {

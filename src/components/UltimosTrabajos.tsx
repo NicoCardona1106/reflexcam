@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 const TRABAJOS = [
   {
@@ -43,42 +46,70 @@ const TRABAJOS = [
   },
 ];
 
+const INTERVALO_MS = 6500; // tiempo que cada foto queda en pantalla
+// El difuminado lento (2.5s) vive en la clase duration-[2500ms] de cada slide.
+
 export default function UltimosTrabajos() {
+  const [activo, setActivo] = useState(0);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const id = setInterval(
+      () => setActivo((a) => (a + 1) % TRABAJOS.length),
+      INTERVALO_MS
+    );
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <section id="trabajos" className="bg-background py-unit-xl">
       <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-        <p className="text-label-mono text-outline uppercase tracking-widest">
+        <p className="text-label-mono text-accent uppercase tracking-widest">
           Portafolio
         </p>
         <h2 className="text-headline-lg-mobile md:text-headline-lg text-primary mt-unit-xs mb-unit-lg">
           Últimos Trabajos
         </h2>
+      </div>
 
-        <div className="overflow-hidden motion-reduce:overflow-x-auto">
-          <div className="flex w-max animate-marquee hover:[animation-play-state:paused] motion-reduce:animate-none">
-            {/* Lista duplicada para el loop infinito; la copia es decorativa */}
-            {[false, true].map((esCopia) =>
-              TRABAJOS.map((t, i) => (
-                <div
-                  key={`${esCopia}-${i}`}
-                  aria-hidden={esCopia || undefined}
-                  className="group relative aspect-[4/3] w-[70vw] sm:w-[45vw] md:w-[22rem] shrink-0 mr-gutter overflow-hidden rounded-lg bg-surface-container-low"
-                >
-                  <Image
-                    src={t.src}
-                    alt={esCopia ? "" : t.alt}
-                    fill
-                    sizes="(min-width: 768px) 352px, 70vw"
-                    priority={!esCopia && i === 0}
-                    className="object-cover transition-transform duration-150 group-hover:scale-105"
-                  />
-                  <span className="absolute bottom-unit-sm left-unit-sm text-label-mono uppercase tracking-widest text-primary bg-surface-container-high/80 px-2 py-1 rounded">
-                    {t.label}
-                  </span>
-                </div>
-              ))
-            )}
+      {/* Carrusel a pantalla (casi) completa: la foto entera, nunca recortada
+          (object-contain sobre el fondo negro), pasando con un fundido lento. */}
+      <div className="relative h-[70svh] w-full md:h-[85svh]">
+        {TRABAJOS.map((t, i) => (
+          <div
+            key={t.src}
+            aria-hidden={i !== activo || undefined}
+            className={`absolute inset-0 transition-opacity duration-[2500ms] ease-in-out motion-reduce:transition-none ${
+              i === activo ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <Image
+              src={t.src}
+              alt={i === activo ? t.alt : ""}
+              fill
+              sizes="100vw"
+              priority={i === 0}
+              className="object-contain"
+            />
+            <span className="absolute bottom-unit-md left-margin-mobile md:left-margin-desktop text-label-mono uppercase tracking-widest text-primary bg-surface-container-high/80 px-2 py-1 rounded-full">
+              {t.label}
+            </span>
           </div>
+        ))}
+
+        {/* Puntos de navegación */}
+        <div className="absolute bottom-unit-md right-margin-mobile md:right-margin-desktop flex gap-unit-xs">
+          {TRABAJOS.map((t, i) => (
+            <button
+              key={t.src}
+              aria-label={`Ver foto ${i + 1}`}
+              aria-current={i === activo || undefined}
+              onClick={() => setActivo(i)}
+              className={`h-2.5 w-2.5 rounded-full transition-colors duration-150 ${
+                i === activo ? "bg-accent-light" : "bg-outline-variant hover:bg-outline"
+              }`}
+            />
+          ))}
         </div>
       </div>
     </section>

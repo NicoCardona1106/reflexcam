@@ -23,7 +23,7 @@ export default function SobreMiPage() {
       <Navbar />
 
       <main className="flex-1 pt-32 pb-unit-xl px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-        <p className="text-label-mono text-outline uppercase tracking-widest">
+        <p className="text-label-mono text-accent uppercase tracking-widest">
           Reflexcam Photography
         </p>
         <h1 className="text-headline-lg-mobile md:text-headline-xl text-primary mt-unit-xs mb-unit-lg max-w-3xl">

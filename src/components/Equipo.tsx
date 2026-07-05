@@ -10,7 +10,7 @@ export default function Equipo() {
   return (
     <section id="equipo" className="bg-background py-unit-xl border-t border-outline-variant/10">
       <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-        <p className="text-label-mono text-outline uppercase tracking-widest">
+        <p className="text-label-mono text-accent uppercase tracking-widest">
           Tecnología
         </p>
         <h2 className="text-headline-lg-mobile md:text-headline-lg text-primary mt-unit-xs mb-unit-lg">

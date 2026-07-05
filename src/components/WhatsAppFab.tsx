@@ -7,7 +7,7 @@ export default function WhatsAppFab() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Escribir por WhatsApp"
-      className="fixed bottom-unit-lg right-unit-lg z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-on-primary shadow-lg transition-transform duration-150 hover:scale-105 active:scale-95"
+      className="fixed bottom-unit-lg right-unit-lg z-50 flex h-14 w-14 items-center justify-center rounded-full bg-accent-light text-background shadow-lg transition-transform duration-150 hover:scale-105 active:scale-95"
     >
       <svg
         viewBox="0 0 32 32"

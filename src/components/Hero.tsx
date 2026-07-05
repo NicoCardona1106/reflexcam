@@ -15,6 +15,10 @@ const GRID_CELLS = GRID_COLS * GRID_ROWS;
 const GRID_GAP_FRACTION = 0.045; // fracción del ancho de celda
 const CELL_CYCLE_MS = 4200;
 const CELL_CROSSFADE_MS = 600;
+// Entrada del grid: las fotos aparecen suavemente una a una y solo cuando
+// el cuadro está completo empieza la rotación (pedido del cliente).
+const CELL_APPEAR_MS = 700;
+const CELL_APPEAR_STAGGER_MS = 450;
 
 // Recorte de la pantalla LCD trasera en el frame final (coords fraccionales
 // 0-1 sobre el frame fuente 1280x720), calibrado visualmente comparando un
@@ -111,6 +115,7 @@ export default function Hero() {
       currentImage: i % POOL_SIZE,
       nextImage: (i + GRID_CELLS) % POOL_SIZE,
       alpha: 0,
+      appearAlpha: 0, // 0→1 durante la entrada una-a-una del grid
       phaseOffset: (CELL_CYCLE_MS / GRID_CELLS) * i,
     }));
 
@@ -175,10 +180,11 @@ export default function Hero() {
           const current = slides[cell.currentImage];
           const next = slides[cell.nextImage];
 
-          if (current && current.complete) {
+          if (cell.appearAlpha > 0 && current && current.complete) {
             const ct = coverTransform(cellW, cellH, current.naturalWidth, current.naturalHeight);
-            ctx.globalAlpha = 1;
+            ctx.globalAlpha = cell.appearAlpha;
             ctx.drawImage(current, cx + ct.dx, cy + ct.dy, ct.drawW, ct.drawH);
+            ctx.globalAlpha = 1;
           }
           if (cell.alpha > 0 && next && next.complete) {
             const nt = coverTransform(cellW, cellH, next.naturalWidth, next.naturalHeight);
@@ -232,6 +238,35 @@ export default function Hero() {
           rafId = requestAnimationFrame(tick);
         } else {
           state.showSlide = true;
+          // Espera a que el portafolio esté decodificado para que la entrada
+          // una-a-una nunca muestre celdas vacías.
+          slidesReady.then(() => {
+            if (!cancelled) runFillIn();
+          });
+        }
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    // Entrada del grid: cada foto aparece con un fundido suave, en orden,
+    // y solo cuando el cuadro está completo arranca la rotación.
+    function runFillIn() {
+      const total = CELL_APPEAR_STAGGER_MS * (GRID_CELLS - 1) + CELL_APPEAR_MS;
+      let start: number | null = null;
+      function tick(time: number) {
+        if (cancelled) return;
+        if (start === null) start = time;
+        const t0 = time - start;
+        cells.forEach((cell, i) => {
+          cell.appearAlpha = Math.min(
+            Math.max((t0 - i * CELL_APPEAR_STAGGER_MS) / CELL_APPEAR_MS, 0),
+            1
+          );
+        });
+        repaint();
+        if (t0 < total) {
+          rafId = requestAnimationFrame(tick);
+        } else {
           runSlideshow();
         }
       }
@@ -289,6 +324,7 @@ export default function Hero() {
     // terminen de cargar/decodificar — si se piden todas a la vez (133
     // imágenes en paralelo) compiten por ancho de banda con los frames justo
     // en el arranque, que es cuando más importa que vayan fluidos.
+    let slidesReady: Promise<void> = Promise.resolve();
     function loadSlides() {
       const slidePromises: Promise<void>[] = [];
       for (let i = 0; i < POOL_SIZE; i++) {
@@ -297,7 +333,7 @@ export default function Hero() {
         slides.push(img);
         slidePromises.push(img.decode().catch(() => {}));
       }
-      Promise.all(slidePromises).then(() => {
+      slidesReady = Promise.all(slidePromises).then(() => {
         if (cancelled) return;
         if (reducedMotion) repaint();
       });
@@ -308,11 +344,15 @@ export default function Hero() {
       if (reducedMotion) {
         state.baseFrame = FRAME_COUNT - 1;
         state.showSlide = true;
+        cells.forEach((cell) => {
+          cell.appearAlpha = 1;
+        });
+        loadSlides();
         repaint();
       } else {
+        loadSlides();
         runIntro();
       }
-      loadSlides();
     });
 
     window.addEventListener("resize", handleResize);
