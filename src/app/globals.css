@@ -50,29 +50,30 @@
   --radius: 0.25rem;
 }
 
+/* Títulos en negrilla (pedido del cliente, 2026-07-04) */
 @utility text-headline-xl {
   font-size: 64px;
-  font-weight: 300;
+  font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.04em;
 }
 
 @utility text-headline-lg {
   font-size: 40px;
-  font-weight: 400;
+  font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.02em;
 }
 
 @utility text-headline-lg-mobile {
   font-size: 32px;
-  font-weight: 400;
+  font-weight: 700;
   line-height: 1.2;
 }
 
 @utility text-headline-md {
   font-size: 24px;
-  font-weight: 500;
+  font-weight: 700;
   line-height: 1.4;
 }
 
