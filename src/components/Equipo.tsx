@@ -1,9 +1,16 @@
+import Image from "next/image";
+
+// Imágenes: portadas oficiales de producto (DJI ya venían con fondo
+// transparente; a Godox y Nikon se les removió el fondo con sharp).
+// La foto de la Nikon D5600 es de Michael Kramer (retoque de Ubcule),
+// Wikimedia Commons, licencia CC BY-SA 3.0 — requiere atribución visible
+// si el sitio se mantiene comercial (pendiente decidir dónde mostrarla).
 const EQUIPO = [
-  { nombre: "Nikon D5600", tipo: "Cámara" },
-  { nombre: "DJI RS 3 Mini", tipo: "Estabilizador" },
-  { nombre: "Godox MS300", tipo: "Flash de estudio" },
-  { nombre: "DJI Mic Mini", tipo: "Micrófonos" },
-  { nombre: "DJI Mavic 3 Pro", tipo: "Dron" },
+  { nombre: "Nikon D5600", tipo: "Cámara", img: "/equipo/nikond5600.webp" },
+  { nombre: "DJI RS 3 Mini", tipo: "Estabilizador", img: "/equipo/rs3mini.webp" },
+  { nombre: "Godox MS300", tipo: "Flash de estudio", img: "/equipo/godoxms300.webp" },
+  { nombre: "DJI Mic Mini", tipo: "Micrófonos", img: "/equipo/micmini.webp" },
+  { nombre: "DJI Mavic 3 Pro", tipo: "Dron", img: "/equipo/mavic3pro.webp" },
 ];
 
 export default function Equipo() {
@@ -17,16 +24,25 @@ export default function Equipo() {
           Equipo
         </h2>
 
-        <div className="flex flex-wrap gap-unit-sm">
+        <div className="grid grid-cols-2 gap-unit-sm sm:grid-cols-3 lg:grid-cols-5">
           {EQUIPO.map((item) => (
             <div
               key={item.nombre}
-              className="flex items-center gap-unit-sm bg-surface-container-low border border-outline-variant/20 rounded px-unit-md py-unit-sm"
+              className="flex flex-col rounded-xl bg-surface-container-low border border-outline-variant/20 p-unit-md transition-transform duration-150 hover:-translate-y-1"
             >
-              <span className="text-label-mono uppercase tracking-widest text-on-surface-variant">
+              <div className="relative h-36 w-full">
+                <Image
+                  src={item.img}
+                  alt={item.nombre}
+                  fill
+                  sizes="(min-width: 1024px) 18vw, (min-width: 640px) 30vw, 45vw"
+                  className="object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)]"
+                />
+              </div>
+              <p className="mt-unit-md text-label-mono uppercase tracking-widest text-on-surface-variant">
                 {item.tipo}
-              </span>
-              <span className="text-body-md text-primary">{item.nombre}</span>
+              </p>
+              <p className="mt-1 text-body-md font-bold text-primary">{item.nombre}</p>
             </div>
           ))}
         </div>
