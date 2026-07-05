@@ -72,9 +72,9 @@ export default function UltimosTrabajos() {
         </h2>
       </div>
 
-      {/* Carrusel a pantalla (casi) completa: la foto entera, nunca recortada
-          (object-contain sobre el fondo negro), pasando con un fundido lento. */}
-      <div className="relative h-[70svh] w-full md:h-[85svh]">
+      {/* Carrusel estilo "Idea carrusel" (referencia del cliente): la imagen
+          cubre todo el ancho y una franja del alto, con fundido lento. */}
+      <div className="relative h-[60svh] w-full md:h-[75svh]">
         {TRABAJOS.map((t, i) => (
           <div
             key={t.src}
@@ -89,7 +89,7 @@ export default function UltimosTrabajos() {
               fill
               sizes="100vw"
               priority={i === 0}
-              className="object-contain"
+              className="object-cover"
             />
             <span className="absolute bottom-unit-md left-margin-mobile md:left-margin-desktop text-label-mono uppercase tracking-widest text-primary bg-surface-container-high/80 px-2 py-1 rounded-full">
               {t.label}
