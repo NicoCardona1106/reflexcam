@@ -44,6 +44,51 @@ const TRABAJOS = [
     label: "Detalle",
     alt: "Detalle de toallas decoradas y pétalos de rosa sobre una cama",
   },
+  {
+    src: "/trabajos/08.webp",
+    label: "Sesión de pareja",
+    alt: "Pareja en cama decorada con globos rojos que forman la frase Te Amo",
+  },
+  {
+    src: "/trabajos/09.webp",
+    label: "Sesión de pareja",
+    alt: "Retrato cercano de una pareja sonriendo con globos rojos de fondo",
+  },
+  {
+    src: "/trabajos/10.webp",
+    label: "Aérea · Cabañas",
+    alt: "Toma aérea con dron de una cabaña de bambú con techo rojo entre vegetación",
+  },
+  {
+    src: "/trabajos/11.webp",
+    label: "Aérea · Cabañas",
+    alt: "Toma aérea con dron de una cabaña con techo azul y rojo en una pradera",
+  },
+  {
+    src: "/trabajos/12.webp",
+    label: "Aérea · Piscina",
+    alt: "Toma aérea con dron de una piscina turquesa rodeada de vegetación tropical",
+  },
+  {
+    src: "/trabajos/13.webp",
+    label: "Aérea · Cabañas",
+    alt: "Toma aérea con dron de una cabaña de madera con jacuzzi en la terraza",
+  },
+  {
+    src: "/trabajos/14.webp",
+    label: "Aérea · Cabañas",
+    alt: "Toma aérea con dron de una cabaña de madera con terraza y jacuzzi entre platanales",
+  },
+  {
+    src: "/trabajos/15.webp",
+    label: "Glamping",
+    alt: "Domo geodésico rojo decorado con globos, jacuzzi y zona de comedor",
+  },
+  {
+    src: "/trabajos/16.webp",
+    label: "Aérea · Glamping",
+    alt: "Toma aérea con dron de un domo geodésico blanco sobre terraza roja",
+  },
 ];
 
 const INTERVALO_MS = 6500; // tiempo que cada foto queda en pantalla
@@ -63,7 +108,7 @@ export default function UltimosTrabajos() {
 
   return (
     <section id="trabajos" className="bg-background py-unit-xl">
-      <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+      <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto text-center">
         <p className="text-label-mono text-accent uppercase tracking-widest">
           Portafolio
         </p>

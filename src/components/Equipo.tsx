@@ -3,8 +3,8 @@ import Image from "next/image";
 // Imágenes: portadas oficiales de producto (DJI ya venían con fondo
 // transparente; a Godox y Nikon se les removió el fondo con sharp).
 // La foto de la Nikon D5600 es de Michael Kramer (retoque de Ubcule),
-// Wikimedia Commons, licencia CC BY-SA 3.0 — requiere atribución visible
-// si el sitio se mantiene comercial (pendiente decidir dónde mostrarla).
+// Wikimedia Commons, licencia CC BY-SA 3.0 — la atribución visible que
+// exige la licencia está en la línea de créditos del Footer.
 const EQUIPO = [
   { nombre: "Nikon D5600", tipo: "Cámara", img: "/equipo/nikond5600.webp" },
   { nombre: "DJI RS 3 Mini", tipo: "Estabilizador", img: "/equipo/rs3mini.webp" },
@@ -17,10 +17,10 @@ export default function Equipo() {
   return (
     <section id="equipo" className="bg-background py-unit-xl border-t border-outline-variant/10">
       <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-        <p className="text-label-mono text-accent uppercase tracking-widest">
+        <p className="text-center text-label-mono text-accent uppercase tracking-widest">
           Tecnología
         </p>
-        <h2 className="text-headline-lg-mobile md:text-headline-lg text-primary mt-unit-xs mb-unit-lg">
+        <h2 className="text-center text-headline-lg-mobile md:text-headline-lg text-primary mt-unit-xs mb-unit-lg">
           Equipo
         </h2>
 

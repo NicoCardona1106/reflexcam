@@ -19,6 +19,18 @@ export default function Footer() {
           <div className="text-on-surface-variant">
             © 2026 REFLEXCAM PHOTOGRAPHY. TODOS LOS DERECHOS RESERVADOS.
           </div>
+          <div className="text-[10px] normal-case tracking-normal text-outline">
+            Foto Nikon D5600: Michael Kramer (Wikimedia Commons,{" "}
+            <a
+              href="https://creativecommons.org/licenses/by-sa/3.0/deed.es"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-on-surface-variant"
+            >
+              CC BY-SA 3.0
+            </a>
+            ).
+          </div>
         </div>
         <div className="flex gap-unit-md">
           <a
