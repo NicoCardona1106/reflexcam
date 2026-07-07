@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const TRABAJOS = [
@@ -119,7 +120,7 @@ export default function UltimosTrabajos() {
 
       {/* Carrusel estilo "Idea carrusel" (referencia del cliente): la imagen
           cubre todo el ancho y una franja del alto, con fundido lento. */}
-      <div className="relative h-[60svh] w-full md:h-[75svh]">
+      <div className="relative h-[70svh] w-full md:h-[88svh]">
         {TRABAJOS.map((t, i) => (
           <div
             key={t.src}
@@ -156,6 +157,15 @@ export default function UltimosTrabajos() {
             />
           ))}
         </div>
+      </div>
+
+      <div className="text-center mt-unit-lg">
+        <Link
+          href="/portafolio"
+          className="inline-block text-label-mono uppercase tracking-widest border border-primary text-primary px-unit-lg py-unit-sm rounded-full hover:bg-primary hover:text-background transition-colors duration-150"
+        >
+          Ver portafolio completo
+        </Link>
       </div>
     </section>
   );

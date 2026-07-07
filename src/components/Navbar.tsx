@@ -20,8 +20,8 @@ export default function Navbar() {
           />
         </Link>
         <div className="flex gap-unit-sm md:gap-unit-md">
-          <Link className={LINK_CLASS} href="/#trabajos">
-            Trabajos
+          <Link className={LINK_CLASS} href="/portafolio">
+            Portafolio
           </Link>
           <Link className={LINK_CLASS} href="/#equipo">
             Equipo
