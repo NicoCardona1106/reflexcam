@@ -2,32 +2,20 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
-import { CATEGORIAS, FOTOS, type Categoria } from "@/lib/portafolio";
+import { CATEGORIAS, type Foto } from "@/lib/portafolio";
 
-type Filtro = Categoria | "todos";
-
-const FILTROS: { id: Filtro; label: string }[] = [
-  { id: "todos", label: "Todos" },
-  ...(Object.entries(CATEGORIAS) as [Categoria, string][]).map(
-    ([id, label]) => ({ id, label })
-  ),
-];
-
-export default function GaleriaPortafolio() {
-  const [filtro, setFiltro] = useState<Filtro>("todos");
-  // índice dentro de `visibles` de la foto ampliada; null = lightbox cerrado
+/** Grilla masonry + lightbox para un listado de fotos ya filtrado. */
+export default function GaleriaPortafolio({ fotos }: { fotos: Foto[] }) {
+  // índice dentro de `fotos` de la foto ampliada; null = lightbox cerrado
   const [ampliada, setAmpliada] = useState<number | null>(null);
-
-  const visibles =
-    filtro === "todos" ? FOTOS : FOTOS.filter((f) => f.categoria === filtro);
 
   const cerrar = useCallback(() => setAmpliada(null), []);
   const mover = useCallback(
     (delta: number) =>
       setAmpliada((a) =>
-        a === null ? a : (a + delta + visibles.length) % visibles.length
+        a === null ? a : (a + delta + fotos.length) % fotos.length
       ),
-    [visibles.length]
+    [fotos.length]
   );
 
   useEffect(() => {
@@ -45,39 +33,13 @@ export default function GaleriaPortafolio() {
     };
   }, [ampliada, cerrar, mover]);
 
-  const foto = ampliada === null ? null : visibles[ampliada];
+  const foto = ampliada === null ? null : fotos[ampliada];
 
   return (
     <div>
-      {/* Filtros por categoría */}
-      <div className="flex flex-wrap gap-unit-xs mb-unit-lg" role="group" aria-label="Filtrar por categoría">
-        {FILTROS.map(({ id, label }) => (
-          <button
-            key={id}
-            onClick={() => {
-              setFiltro(id);
-              setAmpliada(null);
-            }}
-            aria-pressed={filtro === id}
-            className={`text-label-mono uppercase tracking-widest px-unit-md py-unit-sm rounded-full border transition-colors duration-150 cursor-pointer ${
-              filtro === id
-                ? "bg-accent-light text-background border-accent-light"
-                : "border-outline-variant/40 text-on-surface-variant hover:border-outline hover:text-primary"
-            }`}
-          >
-            {label}
-            <span className="ml-1.5 opacity-60">
-              {id === "todos"
-                ? FOTOS.length
-                : FOTOS.filter((f) => f.categoria === id).length}
-            </span>
-          </button>
-        ))}
-      </div>
-
       {/* Masonry con CSS columns (sin dependencias) */}
       <div className="columns-1 sm:columns-2 lg:columns-3 gap-unit-md">
-        {visibles.map((f, i) => (
+        {fotos.map((f, i) => (
           <button
             key={f.src}
             onClick={() => setAmpliada(i)}
@@ -92,9 +54,6 @@ export default function GaleriaPortafolio() {
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="w-full h-auto transition-transform duration-300 group-hover:scale-[1.02] motion-reduce:transition-none"
             />
-            <span className="absolute bottom-unit-xs left-unit-xs text-label-mono uppercase tracking-widest text-primary bg-background/70 backdrop-blur px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-              {CATEGORIAS[f.categoria]}
-            </span>
           </button>
         ))}
       </div>
@@ -121,7 +80,7 @@ export default function GaleriaPortafolio() {
               className="w-auto h-auto max-w-[92vw] max-h-[86vh] object-contain rounded"
             />
             <p className="absolute -bottom-8 left-0 right-0 text-center text-label-mono uppercase tracking-widest text-on-surface-variant">
-              {CATEGORIAS[foto.categoria]} · {ampliada! + 1} / {visibles.length}
+              {CATEGORIAS[foto.categoria]} · {ampliada! + 1} / {fotos.length}
             </p>
           </div>
 
