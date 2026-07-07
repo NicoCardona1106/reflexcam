@@ -3,94 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { CATEGORIAS, ultimasFotos } from "@/lib/portafolio";
 
-const TRABAJOS = [
-  {
-    src: "/trabajos/00.webp",
-    label: "Aérea · Arquitectura",
-    alt: "Toma aérea con dron de una casa moderna con piscina en medio de montañas verdes",
-  },
-  {
-    src: "/trabajos/01.webp",
-    label: "Aérea · Glamping",
-    alt: "Toma aérea con dron de un domo geodésico de glamping junto a una cabaña",
-  },
-  {
-    src: "/trabajos/02.webp",
-    label: "Aérea · Glamping",
-    alt: "Toma aérea con dron de un domo geodésico verde sobre terraza de madera",
-  },
-  {
-    src: "/trabajos/03.webp",
-    label: "Aérea · Glamping",
-    alt: "Toma aérea con dron de un domo geodésico azul con jacuzzi en la terraza",
-  },
-  {
-    src: "/trabajos/04.webp",
-    label: "Aérea · Glamping",
-    alt: "Toma aérea con dron de un domo geodésico verde en una pradera",
-  },
-  {
-    src: "/trabajos/05.webp",
-    label: "Interior",
-    alt: "Interior de domo de glamping con cama decorada con pétalos y globos",
-  },
-  {
-    src: "/trabajos/06.webp",
-    label: "Interior",
-    alt: "Interior de domo de glamping con cama y decoración romántica",
-  },
-  {
-    src: "/trabajos/07.webp",
-    label: "Detalle",
-    alt: "Detalle de toallas decoradas y pétalos de rosa sobre una cama",
-  },
-  {
-    src: "/trabajos/08.webp",
-    label: "Sesión de pareja",
-    alt: "Pareja en cama decorada con globos rojos que forman la frase Te Amo",
-  },
-  {
-    src: "/trabajos/09.webp",
-    label: "Sesión de pareja",
-    alt: "Retrato cercano de una pareja sonriendo con globos rojos de fondo",
-  },
-  {
-    src: "/trabajos/10.webp",
-    label: "Aérea · Cabañas",
-    alt: "Toma aérea con dron de una cabaña de bambú con techo rojo entre vegetación",
-  },
-  {
-    src: "/trabajos/11.webp",
-    label: "Aérea · Cabañas",
-    alt: "Toma aérea con dron de una cabaña con techo azul y rojo en una pradera",
-  },
-  {
-    src: "/trabajos/12.webp",
-    label: "Aérea · Piscina",
-    alt: "Toma aérea con dron de una piscina turquesa rodeada de vegetación tropical",
-  },
-  {
-    src: "/trabajos/13.webp",
-    label: "Aérea · Cabañas",
-    alt: "Toma aérea con dron de una cabaña de madera con jacuzzi en la terraza",
-  },
-  {
-    src: "/trabajos/14.webp",
-    label: "Aérea · Cabañas",
-    alt: "Toma aérea con dron de una cabaña de madera con terraza y jacuzzi entre platanales",
-  },
-  {
-    src: "/trabajos/15.webp",
-    label: "Glamping",
-    alt: "Domo geodésico rojo decorado con globos, jacuzzi y zona de comedor",
-  },
-  {
-    src: "/trabajos/16.webp",
-    label: "Aérea · Glamping",
-    alt: "Toma aérea con dron de un domo geodésico blanco sobre terraza roja",
-  },
-];
+// Las 10 fotos más recientes por fecha de subida (ver src/lib/portafolio.ts)
+const TRABAJOS = ultimasFotos(10);
 
 const INTERVALO_MS = 6500; // tiempo que cada foto queda en pantalla
 // El difuminado lento (2.5s) vive en la clase duration-[2500ms] de cada slide.
@@ -106,6 +22,8 @@ export default function UltimosTrabajos() {
     );
     return () => clearInterval(id);
   }, []);
+
+  const siguiente = (activo + 1) % TRABAJOS.length;
 
   return (
     <section id="trabajos" className="bg-background py-unit-xl">
@@ -134,11 +52,14 @@ export default function UltimosTrabajos() {
               alt={i === activo ? t.alt : ""}
               fill
               sizes="100vw"
-              priority={i === 0}
+              // el slide activo y el siguiente se descargan de inmediato para
+              // que el fundido nunca muestre una foto a medio cargar
+              loading={i === activo || i === siguiente ? "eager" : "lazy"}
+              preload={i === 0}
               className="object-cover"
             />
             <span className="absolute bottom-unit-md left-margin-mobile md:left-margin-desktop text-label-mono uppercase tracking-widest text-primary bg-surface-container-high/80 px-2 py-1 rounded-full">
-              {t.label}
+              {CATEGORIAS[t.categoria]}
             </span>
           </div>
         ))}
