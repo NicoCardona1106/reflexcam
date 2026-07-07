@@ -371,136 +371,136 @@ export const FOTOS: Foto[] = [
   },
   {
     src: "/trabajos/00.webp",
-    width: 3840,
-    height: 2877,
+    width: 1920,
+    height: 1438,
     categoria: "aerea",
     alt: "Toma aérea con dron de una casa moderna con piscina en medio de montañas verdes",
     fecha: "2026-07-03"
   },
   {
     src: "/trabajos/01.webp",
-    width: 3840,
-    height: 2778,
+    width: 1920,
+    height: 1389,
     categoria: "aerea",
     alt: "Toma aérea con dron de un domo geodésico de glamping junto a una cabaña",
     fecha: "2026-07-03"
   },
   {
     src: "/trabajos/02.webp",
-    width: 3840,
-    height: 2875,
+    width: 1920,
+    height: 1438,
     categoria: "aerea",
     alt: "Toma aérea con dron de un domo geodésico verde sobre terraza de madera",
     fecha: "2026-07-03"
   },
   {
     src: "/trabajos/03.webp",
-    width: 3840,
-    height: 2152,
+    width: 1920,
+    height: 1076,
     categoria: "aerea",
     alt: "Toma aérea con dron de un domo geodésico azul con jacuzzi en la terraza",
     fecha: "2026-07-03"
   },
   {
     src: "/trabajos/04.webp",
-    width: 3667,
-    height: 2750,
+    width: 1920,
+    height: 1440,
     categoria: "aerea",
     alt: "Toma aérea con dron de un domo geodésico verde en una pradera",
     fecha: "2026-07-03"
   },
   {
     src: "/trabajos/05.webp",
-    width: 3840,
-    height: 2560,
+    width: 1920,
+    height: 1280,
     categoria: "comercial",
     alt: "Interior de domo de glamping con cama decorada con pétalos y globos",
     fecha: "2026-07-03"
   },
   {
     src: "/trabajos/06.webp",
-    width: 3840,
-    height: 2560,
+    width: 1920,
+    height: 1280,
     categoria: "comercial",
     alt: "Interior de domo de glamping con cama y decoración romántica",
     fecha: "2026-07-03"
   },
   {
     src: "/trabajos/07.webp",
-    width: 3840,
-    height: 2560,
+    width: 1920,
+    height: 1280,
     categoria: "comercial",
     alt: "Detalle de toallas decoradas y pétalos de rosa sobre una cama",
     fecha: "2026-07-03"
   },
   {
     src: "/trabajos/08.webp",
-    width: 3840,
-    height: 2042,
+    width: 1920,
+    height: 1021,
     categoria: "retratos",
     alt: "Pareja en cama decorada con globos rojos que forman la frase Te Amo",
     fecha: "2026-07-03"
   },
   {
     src: "/trabajos/09.webp",
-    width: 3840,
-    height: 5761,
+    width: 1280,
+    height: 1920,
     categoria: "retratos",
     alt: "Retrato cercano de una pareja sonriendo con globos rojos de fondo",
     fecha: "2026-07-03"
   },
   {
     src: "/trabajos/10.webp",
-    width: 3840,
-    height: 2880,
+    width: 1920,
+    height: 1440,
     categoria: "aerea",
     alt: "Toma aérea con dron de una cabaña de bambú con techo rojo entre vegetación",
     fecha: "2026-07-03"
   },
   {
     src: "/trabajos/11.webp",
-    width: 3840,
-    height: 2478,
+    width: 1920,
+    height: 1239,
     categoria: "aerea",
     alt: "Toma aérea con dron de una cabaña con techo azul y rojo en una pradera",
     fecha: "2026-07-03"
   },
   {
     src: "/trabajos/12.webp",
-    width: 3840,
-    height: 2549,
+    width: 1920,
+    height: 1274,
     categoria: "aerea",
     alt: "Toma aérea con dron de una piscina turquesa rodeada de vegetación tropical",
     fecha: "2026-07-03"
   },
   {
     src: "/trabajos/13.webp",
-    width: 3840,
-    height: 2214,
+    width: 1920,
+    height: 1107,
     categoria: "aerea",
     alt: "Toma aérea con dron de una cabaña de madera con jacuzzi en la terraza",
     fecha: "2026-07-03"
   },
   {
     src: "/trabajos/14.webp",
-    width: 3840,
-    height: 2200,
+    width: 1920,
+    height: 1100,
     categoria: "aerea",
     alt: "Toma aérea con dron de una cabaña de madera con terraza y jacuzzi entre platanales",
     fecha: "2026-07-03"
   },
   {
     src: "/trabajos/15.webp",
-    width: 3840,
-    height: 2100,
+    width: 1920,
+    height: 1050,
     categoria: "comercial",
     alt: "Domo geodésico rojo decorado con globos, jacuzzi y zona de comedor",
     fecha: "2026-07-03"
   },
   {
     src: "/trabajos/16.webp",
-    width: 3632,
-    height: 2724,
+    width: 1920,
+    height: 1440,
     categoria: "aerea",
     alt: "Toma aérea con dron de un domo geodésico blanco sobre terraza roja",
     fecha: "2026-07-03"
