@@ -8,14 +8,22 @@ const LINK_CLASS =
 export default function Navbar() {
   return (
     <nav className="bg-background/80 backdrop-blur-xl fixed top-0 w-full z-50 border-b border-outline-variant/10 text-primary">
-      <div className="flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop w-full max-w-container-max mx-auto">
-        <Link href="/" className="flex items-center">
+      <div className="flex justify-between items-center gap-unit-md h-16 px-margin-mobile md:px-margin-desktop w-full max-w-container-max mx-auto">
+        <Link href="/" className="flex items-center shrink-0">
+          <Image
+            src="/logo.png"
+            alt="Reflex Cam Photography"
+            width={256}
+            height={256}
+            className="h-9 w-9 sm:hidden"
+            priority
+          />
           <Image
             src="/logo-full.png"
             alt="Reflex Cam Photography"
             width={656}
             height={144}
-            className="h-7 w-auto sm:h-9"
+            className="hidden h-9 w-auto sm:block"
             priority
           />
         </Link>
