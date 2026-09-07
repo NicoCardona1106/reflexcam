@@ -50,15 +50,26 @@ const ROUND_LABELS = [
   { text: "AF-ON", cx: 0.671, cy: 0.458, r: 0.016 },
   { text: "AEL", cx: 0.674, cy: 0.545, r: 0.016 },
 ];
+// Botón de reproducción (▶) de la cámara: es el enlace a la galería. Centro y
+// radio del frente del botón en fracciones del frame 91; debajo se pinta un
+// rótulo pequeño que dice qué hace (pedido de Nicolas 2026-09-06).
+const GALLERY_BUTTON = { cx: 0.682, cy: 0.875, r: 0.0125, label: "VER GALERÍA" };
+
+// El giro arranca en cuanto están decodificados los primeros frames; el resto
+// sigue bajando mientras la cámara gira (antes se esperaba a los 92 → ~2 s en
+// negro). Si un frame aún no llegó, repaint() dibuja el último decodificado.
+const START_READY = 12;
 const EDGE_FADE_FRACTION = 0.24; // del lado menor de la imagen dibujada (0.16 con el clip oscuro anterior)
 // Velo uniforme sobre el video para acercar su fondo de estudio (más claro)
 // al color de la página sin apagar la cámara. Calibrado visualmente.
 const DIM_ALPHA = 0.3; // 0.22 con el clip anterior; el de HeyGen tiene el foco de estudio más claro
 
-function easeInOutCubic(progress: number) {
+// Cuadrático, no cúbico: con el cúbico el primer segundo del giro era casi
+// estático (frame 0-1) y se sentía como retraso de carga.
+function easeInOutQuad(progress: number) {
   return progress < 0.5
-    ? 4 * progress * progress * progress
-    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+    ? 2 * progress * progress
+    : 1 - Math.pow(-2 * progress + 2, 2) / 2;
 }
 
 type BaseTransform = { dx: number; dy: number; drawW: number; drawH: number };
@@ -109,7 +120,7 @@ function containTransform(
 
 export default function Hero() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const lcdLinkRef = useRef<HTMLAnchorElement>(null);
+  const galleryLinkRef = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
     // Las funciones declaradas más abajo se hoistean por encima de estos
@@ -154,8 +165,11 @@ export default function Hero() {
     }
 
     function repaint() {
-      const baseImg = frames[state.baseFrame];
-      if (!baseImg || !baseImg.complete || baseImg.naturalWidth === 0) return;
+      // el frame pedido o, si aún no bajó, el último anterior ya decodificado
+      let f = state.baseFrame;
+      while (f > 0 && !decoded[f]) f--;
+      const baseImg = frames[f];
+      if (!decoded[f] || !baseImg) return;
 
       resizeCanvasIfNeeded();
       ctx.imageSmoothingEnabled = true;
@@ -217,20 +231,26 @@ export default function Hero() {
 
         paintLabels(t, cells[0].appearAlpha);
 
-        // La pantalla es un enlace al portafolio: el <a> se coloca encima del
-        // recorte del LCD en píxeles CSS (el canvas trabaja en píxeles físicos).
-        const link = lcdLinkRef.current;
+        // El botón ▶ es un enlace al portafolio: el <a> (círculo) se coloca
+        // encima en píxeles CSS (el canvas trabaja en píxeles físicos).
+        const link = galleryLinkRef.current;
         if (link) {
           const dpr = canvas.width / canvas.clientWidth;
-          link.style.left = `${rectX / dpr}px`;
-          link.style.top = `${rectY / dpr}px`;
-          link.style.width = `${rectW / dpr}px`;
-          link.style.height = `${rectH / dpr}px`;
+          const r = (GALLERY_BUTTON.r * t.drawW * 1.6) / dpr;
+          const cx = (t.dx + GALLERY_BUTTON.cx * t.drawW) / dpr;
+          const cy = (t.dy + GALLERY_BUTTON.cy * t.drawH) / dpr;
+          link.style.left = `${cx - r}px`;
+          link.style.top = `${cy - r}px`;
+          link.style.width = `${r * 2}px`;
+          link.style.height = `${r * 2}px`;
           link.hidden = false;
         }
       }
 
       fadeImageEdges(t);
+      // Después de la viñeta: el botón está cerca del borde inferior y el aro y
+      // el rótulo quedaban apagados si se pintaban antes.
+      if (state.showSlide) paintGalleryHint(t, cells[0].appearAlpha);
     }
 
     function paintLabels(t: BaseTransform, alpha: number) {
@@ -283,6 +303,29 @@ export default function Hero() {
       ctx.restore();
     }
 
+    // Aro alrededor del botón ▶ y rótulo "VER GALERÍA" debajo, para que se
+    // entienda que es clicable sin explicarlo en ningún otro sitio.
+    function paintGalleryHint(t: BaseTransform, alpha: number) {
+      if (alpha <= 0) return;
+      const cx = t.dx + GALLERY_BUTTON.cx * t.drawW;
+      const cy = t.dy + GALLERY_BUTTON.cy * t.drawH;
+      const r = GALLERY_BUTTON.r * t.drawW;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 1.45, 0, Math.PI * 2);
+      ctx.lineWidth = Math.max(1, r * 0.12);
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.55)";
+      ctx.stroke();
+      const size = Math.max(9, r * 0.62);
+      ctx.font = `600 ${size}px Montserrat, Arial, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+      ctx.fillText(GALLERY_BUTTON.label, cx, cy + r * 1.9);
+      ctx.restore();
+    }
+
     // Degradados desde cada borde de la imagen hacia adentro, en el color
     // plano de la página, para eliminar la costura entre el fondo de estudio
     // del video y el fondo del sitio.
@@ -326,7 +369,7 @@ export default function Hero() {
         if (cancelled) return;
         if (startTime === null) startTime = time;
         const progress = Math.min((time - startTime) / INTRO_DURATION_MS, 1);
-        const eased = easeInOutCubic(progress);
+        const eased = easeInOutQuad(progress);
         state.baseFrame = Math.round(eased * (FRAME_COUNT - 1));
         repaint();
         if (progress < 1) {
@@ -403,15 +446,21 @@ export default function Hero() {
     // vez que cada imagen se dibuja en el canvas, lo que produce el stutter
     // (~2fps) que se ve apenas arranca el giro hasta que el cache de
     // decodificación se calienta.
+    const decoded: boolean[] = [];
     const framePromises: Promise<void>[] = [];
     for (let i = 0; i < FRAME_COUNT; i++) {
       const img = new Image();
       img.src = FRAME_SRC(i);
       frames.push(img);
-      if (i === 0) {
-        img.decode().then(() => repaint()).catch(() => {});
-      }
-      framePromises.push(img.decode().catch(() => {}));
+      framePromises.push(
+        img
+          .decode()
+          .then(() => {
+            decoded[i] = true;
+            if (i === 0) repaint();
+          })
+          .catch(() => {})
+      );
     }
 
     // Las miniaturas del portafolio recién hacen falta cuando termina el giro
@@ -419,7 +468,10 @@ export default function Hero() {
     // terminen de cargar/decodificar — si se piden todas a la vez (133
     // imágenes en paralelo) compiten por ancho de banda con los frames justo
     // en el arranque, que es cuando más importa que vayan fluidos.
-    let slidesReady: Promise<void> = Promise.resolve();
+    let resolveSlides: () => void = () => {};
+    const slidesReady = new Promise<void>((resolve) => {
+      resolveSlides = resolve;
+    });
     function loadSlides() {
       const slidePromises: Promise<void>[] = [];
       for (let i = 0; i < POOL_SIZE; i++) {
@@ -428,25 +480,27 @@ export default function Hero() {
         slides.push(img);
         slidePromises.push(img.decode().catch(() => {}));
       }
-      slidesReady = Promise.all(slidePromises).then(() => {
-        if (cancelled) return;
-        if (reducedMotion) repaint();
+      Promise.all(slidePromises).then(() => {
+        if (!cancelled && reducedMotion) repaint();
+        resolveSlides();
       });
     }
 
+    // Arranque: con los primeros frames listos ya gira; el resto sigue bajando.
+    Promise.all(framePromises.slice(0, START_READY)).then(() => {
+      if (cancelled || reducedMotion) return;
+      runIntro();
+    });
     Promise.all(framePromises).then(() => {
       if (cancelled) return;
+      loadSlides();
       if (reducedMotion) {
         state.baseFrame = FRAME_COUNT - 1;
         state.showSlide = true;
         cells.forEach((cell) => {
           cell.appearAlpha = 1;
         });
-        loadSlides();
         repaint();
-      } else {
-        loadSlides();
-        runIntro();
       }
     });
 
@@ -466,14 +520,14 @@ export default function Hero() {
         className="absolute inset-0 w-full h-full z-0"
         aria-label="Cámara rotando hasta mostrar su pantalla LCD trasera, donde se proyecta una muestra del portafolio"
       />
-      {/* La pantalla con la galería lleva al portafolio; se posiciona desde repaint() */}
+      {/* El botón ▶ de la cámara lleva a la galería; se posiciona desde repaint() */}
       <Link
-        ref={lcdLinkRef}
+        ref={galleryLinkRef}
         href="/portafolio"
         hidden
-        aria-label="Ver el portafolio completo"
-        title="Ver portafolio"
-        className="absolute z-20 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        aria-label="Ver la galería del portafolio"
+        title="Ver galería"
+        className="absolute z-20 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary"
       />
 
       <div className="absolute inset-0 z-10 pointer-events-none flex flex-col justify-between px-margin-mobile md:px-margin-desktop pt-margin-mobile md:pt-margin-desktop pb-24 md:pb-margin-desktop">
