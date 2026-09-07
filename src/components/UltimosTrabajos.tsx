@@ -54,7 +54,9 @@ export default function UltimosTrabajos() {
               sizes="100vw"
               // el slide activo y el siguiente se descargan de inmediato para
               // que el fundido nunca muestre una foto a medio cargar
-              loading={i === activo || i === siguiente ? "eager" : "lazy"}
+              // el primero queda eager siempre: con preload + lazy (cuando el
+              // carrusel ya avanzó) Next 16 lanza un error en tiempo de ejecución
+              loading={i === 0 || i === activo || i === siguiente ? "eager" : "lazy"}
               preload={i === 0}
               className="object-cover"
             />

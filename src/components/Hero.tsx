@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 
-const FRAME_COUNT = 120;
+// Frames 0..91 del video 4K de HeyGen (ver scripts/process-hero-frames.mjs):
+// frente del lente → giro → pantalla LCD de frente.
+const FRAME_COUNT = 92;
 const INTRO_DURATION_MS = 7000;
 const FRAME_SRC = (i: number) => `/frames/${String(i).padStart(3, "0")}.webp`;
 
@@ -20,11 +23,11 @@ const CELL_CROSSFADE_MS = 600;
 const CELL_APPEAR_MS = 700;
 const CELL_APPEAR_STAGGER_MS = 450;
 
-// Recorte de la pantalla LCD trasera en el frame final (coords fraccionales
-// 0-1 sobre el frame fuente 1280x720), calibrado visualmente comparando un
-// rectángulo de overlay contra el borde real de la pantalla en el frame
-// servido (web/public/frames/119.webp).
-const SCREEN_RECT = { x0: 0.286, y0: 0.41, x1: 0.597, y1: 0.763 };
+// Recorte del cristal de la pantalla LCD trasera en el frame final (coords
+// fraccionales 0-1 sobre el frame, independientes de la resolución servida),
+// calibrado el 2026-09-06 dibujando un rectángulo sobre el frame 91 del video
+// 4K de HeyGen y ajustándolo al borde del cristal, un pelo por dentro del bisel.
+const SCREEN_RECT = { x0: 0.29, y0: 0.535, x1: 0.628, y1: 0.913 };
 
 // Color plano de fondo de la página (--color-background). Los frames del
 // video traen su propio fondo de estudio en degradado; se funden los bordes
@@ -32,10 +35,19 @@ const SCREEN_RECT = { x0: 0.286, y0: 0.41, x1: 0.597, y1: 0.763 };
 // el resto de la página. Sobra cuando el video propio se grabe sobre fondo
 // plano #131313.
 const BG_RGB = "19, 19, 19";
-const EDGE_FADE_FRACTION = 0.16; // del lado menor de la imagen dibujada
+
+// Los rótulos de los botones del video de HeyGen salen deformados por la IA
+// ("Q5710", "WIENU"). Sobre el frame final se pintan rótulos limpios: la
+// insignia del modelo pasa a ser la marca y el botón MENU vuelve a leerse.
+// Coords fraccionales del frente de cada pastilla, medidas sobre el frame 91.
+const LABELS = [
+  { text: "REFLEXCAM", x0: 0.512, y0: 0.441, x1: 0.557, y1: 0.468 },
+  { text: "MENU", x0: 0.582, y0: 0.441, x1: 0.621, y1: 0.468 },
+];
+const EDGE_FADE_FRACTION = 0.24; // del lado menor de la imagen dibujada (0.16 con el clip oscuro anterior)
 // Velo uniforme sobre el video para acercar su fondo de estudio (más claro)
 // al color de la página sin apagar la cámara. Calibrado visualmente.
-const DIM_ALPHA = 0.22;
+const DIM_ALPHA = 0.3; // 0.22 con el clip anterior; el de HeyGen tiene el foco de estudio más claro
 
 function easeInOutCubic(progress: number) {
   return progress < 0.5
@@ -91,6 +103,7 @@ function containTransform(
 
 export default function Hero() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const lcdLinkRef = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
     // Las funciones declaradas más abajo se hoistean por encima de estos
@@ -195,9 +208,55 @@ export default function Hero() {
 
           ctx.restore();
         });
+
+        paintLabels(t, cells[0].appearAlpha);
+
+        // La pantalla es un enlace al portafolio: el <a> se coloca encima del
+        // recorte del LCD en píxeles CSS (el canvas trabaja en píxeles físicos).
+        const link = lcdLinkRef.current;
+        if (link) {
+          const dpr = canvas.width / canvas.clientWidth;
+          link.style.left = `${rectX / dpr}px`;
+          link.style.top = `${rectY / dpr}px`;
+          link.style.width = `${rectW / dpr}px`;
+          link.style.height = `${rectH / dpr}px`;
+          link.hidden = false;
+        }
       }
 
       fadeImageEdges(t);
+    }
+
+    function paintLabels(t: BaseTransform, alpha: number) {
+      if (alpha <= 0) return;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      for (const l of LABELS) {
+        const x = t.dx + l.x0 * t.drawW;
+        const y = t.dy + l.y0 * t.drawH;
+        const w = (l.x1 - l.x0) * t.drawW;
+        const h = (l.y1 - l.y0) * t.drawH;
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, h / 2);
+        ctx.fillStyle = "rgb(30, 30, 30)";
+        ctx.fill();
+        ctx.lineWidth = Math.max(1, h * 0.06);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.16)";
+        ctx.stroke();
+        ctx.fillStyle = "rgba(232, 232, 232, 0.92)";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        // La fuente se ajusta al ancho de la pastilla (REFLEXCAM es más largo que MENU).
+        let size = h * 0.55;
+        ctx.font = `700 ${size}px Montserrat, Arial, sans-serif`;
+        const maxW = w * 0.8;
+        if (ctx.measureText(l.text).width > maxW) {
+          size *= maxW / ctx.measureText(l.text).width;
+          ctx.font = `700 ${size}px Montserrat, Arial, sans-serif`;
+        }
+        ctx.fillText(l.text, x + w / 2, y + h / 2 + size * 0.05);
+      }
+      ctx.restore();
     }
 
     // Degradados desde cada borde de la imagen hacia adentro, en el color
@@ -223,6 +282,18 @@ export default function Hero() {
           ctx.fillRect(t.dx, Math.min(y0, y1), t.drawW, fade);
         }
       }
+      // Viñeta radial: el foco de estudio del video de HeyGen es más claro que
+      // la página y en pantallas angostas la franja 16:9 se notaba como un
+      // rectángulo; con la viñeta las esquinas se funden al fondo y el foco
+      // queda como luz natural sobre la cámara.
+      const cx = t.dx + t.drawW / 2;
+      const cy = t.dy + t.drawH / 2;
+      const r = Math.hypot(t.drawW, t.drawH) / 2;
+      const v = ctx.createRadialGradient(cx, cy, r * 0.42, cx, cy, r);
+      v.addColorStop(0, `rgba(${BG_RGB}, 0)`);
+      v.addColorStop(1, `rgba(${BG_RGB}, 0.9)`);
+      ctx.fillStyle = v;
+      ctx.fillRect(t.dx, t.dy, t.drawW, t.drawH);
     }
 
     function runIntro() {
@@ -370,6 +441,15 @@ export default function Hero() {
         ref={canvasRef}
         className="absolute inset-0 w-full h-full z-0"
         aria-label="Cámara rotando hasta mostrar su pantalla LCD trasera, donde se proyecta una muestra del portafolio"
+      />
+      {/* La pantalla con la galería lleva al portafolio; se posiciona desde repaint() */}
+      <Link
+        ref={lcdLinkRef}
+        href="/portafolio"
+        hidden
+        aria-label="Ver el portafolio completo"
+        title="Ver portafolio"
+        className="absolute z-20 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-primary"
       />
 
       <div className="absolute inset-0 z-10 pointer-events-none flex flex-col justify-between px-margin-mobile md:px-margin-desktop pt-margin-mobile md:pt-margin-desktop pb-24 md:pb-margin-desktop">
