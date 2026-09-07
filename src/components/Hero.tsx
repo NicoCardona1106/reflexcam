@@ -151,8 +151,18 @@ export default function Hero() {
 
     const state = {
       baseFrame: 0,
+      // posición fraccional (0..FRAME_COUNT-1) durante el giro: la parte
+      // decimal funde el frame siguiente sobre el actual para que los ~13
+      // frames/s de la secuencia se vean continuos en vez de a saltos
+      framePos: 0,
       showSlide: false,
     };
+
+    // Los fundidos de borde y la viñeta son 5 degradados a pantalla completa:
+    // pintarlos en cada tick era lo más caro del giro. Se dibujan una vez por
+    // tamaño de canvas en un canvas aparte y luego es un solo drawImage.
+    let overlay: HTMLCanvasElement | null = null;
+    let overlayKey = "";
 
     function resizeCanvasIfNeeded() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -183,6 +193,17 @@ export default function Hero() {
         baseImg.naturalHeight
       );
       ctx.drawImage(baseImg, t.dx, t.dy, t.drawW, t.drawH);
+
+      // Fundido con el frame siguiente según la parte decimal de framePos.
+      if (!state.showSlide) {
+        const frac = state.framePos - f;
+        const next = frames[f + 1];
+        if (frac > 0.02 && decoded[f + 1] && next) {
+          ctx.globalAlpha = frac;
+          ctx.drawImage(next, t.dx, t.dy, t.drawW, t.drawH);
+          ctx.globalAlpha = 1;
+        }
+      }
 
       // Velo antes del grid del LCD: atenúa el fondo de estudio del video
       // sin apagar las fotos del portafolio.
@@ -330,6 +351,19 @@ export default function Hero() {
     // plano de la página, para eliminar la costura entre el fondo de estudio
     // del video y el fondo del sitio.
     function fadeImageEdges(t: BaseTransform) {
+      const key = `${canvas.width}x${canvas.height}:${t.dx},${t.dy},${t.drawW},${t.drawH}`;
+      if (!overlay || overlayKey !== key) {
+        overlay = document.createElement("canvas");
+        overlay.width = canvas.width;
+        overlay.height = canvas.height;
+        const octx = overlay.getContext("2d");
+        if (octx) paintEdgesInto(octx, t);
+        overlayKey = key;
+      }
+      ctx.drawImage(overlay, 0, 0);
+    }
+
+    function paintEdgesInto(ctx: CanvasRenderingContext2D, t: BaseTransform) {
       const fade = Math.min(t.drawW, t.drawH) * EDGE_FADE_FRACTION;
       const edges: [number, number, number, number][] = [
         [t.dx, t.dy, t.dx, t.dy + fade], // superior
@@ -370,7 +404,8 @@ export default function Hero() {
         if (startTime === null) startTime = time;
         const progress = Math.min((time - startTime) / INTRO_DURATION_MS, 1);
         const eased = easeInOutQuad(progress);
-        state.baseFrame = Math.round(eased * (FRAME_COUNT - 1));
+        state.framePos = eased * (FRAME_COUNT - 1);
+        state.baseFrame = Math.floor(state.framePos);
         repaint();
         if (progress < 1) {
           rafId = requestAnimationFrame(tick);
