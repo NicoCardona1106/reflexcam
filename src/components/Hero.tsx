@@ -9,7 +9,11 @@ import Link from "next/link";
 // (SCREEN_RECT y los rótulos están calibrados sobre él).
 const FRAME_COUNT = 181;
 const INTRO_DURATION_MS = 7000;
-const FRAME_SRC = (i: number) => `/frames/${String(i).padStart(3, "0")}.webp`;
+// Dos sets con los mismos 181 frames: 1920 px para escritorio (~11 MB) y
+// 1024 px para celular (~4,6 MB), donde la imagen se dibuja a ~600 px de ancho
+// y el 1920 solo costaba datos y tiempo de carga.
+const MOBILE_MAX_WIDTH = 768;
+const FRAME_SRC = (dir: string, i: number) => `${dir}/${String(i).padStart(3, "0")}.webp`;
 
 const POOL_SIZE = 13;
 const SLIDE_SRC = (i: number) => `/portfolio/${String(i).padStart(2, "0")}.webp`;
@@ -61,7 +65,14 @@ const GALLERY_BUTTON = { cx: 0.682, cy: 0.875, r: 0.0125, label: "VER GALERÍA" 
 // sigue bajando mientras la cámara gira (antes se esperaba a los 92 → ~2 s en
 // negro). Si un frame aún no llegó, repaint() dibuja el último decodificado.
 const START_READY = 24;
-const BLEND = 0.5;
+// 0 = sin fundido entre frames. Con 181 frames reales el fundido ya no hace
+// falta y Nicolas lo veía como blur. (0.5 suaviza; 1 es fundido completo.)
+const BLEND = 0;
+
+// En vertical (celular) la franja 16:9 dejaba la cámara diminuta y el botón de
+// galería de 5 px. Se acerca un 45 %: el LCD (x 0.29-0.63 del frame) y el botón
+// ▶ (x 0.68) siguen dentro de pantalla; solo se recortan los bordes del estudio.
+const PORTRAIT_ZOOM = 1.45;
 const EDGE_FADE_FRACTION = 0.24; // del lado menor de la imagen dibujada (0.16 con el clip oscuro anterior)
 // Velo uniforme sobre el video para acercar su fondo de estudio (más claro)
 // al color de la página sin apagar la cámara. Calibrado visualmente.
@@ -195,6 +206,12 @@ export default function Hero() {
         baseImg.naturalWidth,
         baseImg.naturalHeight
       );
+      if (canvas.width < canvas.height) {
+        t.drawW *= PORTRAIT_ZOOM;
+        t.drawH *= PORTRAIT_ZOOM;
+        t.dx = (canvas.width - t.drawW) / 2;
+        t.dy = (canvas.height - t.drawH) / 2;
+      }
       ctx.drawImage(baseImg, t.dx, t.dy, t.drawW, t.drawH);
 
       // Fundido con el frame siguiente según la parte decimal de framePos. Con
@@ -262,7 +279,8 @@ export default function Hero() {
         const link = galleryLinkRef.current;
         if (link) {
           const dpr = canvas.width / canvas.clientWidth;
-          const r = (GALLERY_BUTTON.r * t.drawW * 1.6) / dpr;
+          // nunca menor de 44 px CSS: área táctil mínima en celular
+          const r = Math.max(22, (GALLERY_BUTTON.r * t.drawW * 1.6) / dpr);
           const cx = (t.dx + GALLERY_BUTTON.cx * t.drawW) / dpr;
           const cy = (t.dy + GALLERY_BUTTON.cy * t.drawH) / dpr;
           link.style.left = `${cx - r}px`;
@@ -404,13 +422,27 @@ export default function Hero() {
 
     function runIntro() {
       let startTime: number | null = null;
+      let prevTime = 0;
+      // tiempo acumulado en pausa esperando frames: se descuenta del progreso
+      // para que, en una conexión lenta, el giro se detenga y siga desde donde
+      // iba en vez de saltar varios frames de golpe
+      let stalled = 0;
       function tick(time: number) {
         if (cancelled) return;
-        if (startTime === null) startTime = time;
-        const progress = Math.min((time - startTime) / INTRO_DURATION_MS, 1);
-        const eased = easeInOutQuad(progress);
-        state.framePos = eased * (FRAME_COUNT - 1);
-        state.baseFrame = Math.floor(state.framePos);
+        if (startTime === null) {
+          startTime = time;
+          prevTime = time;
+        }
+        let progress = Math.min((time - startTime - stalled) / INTRO_DURATION_MS, 1);
+        let target = easeInOutQuad(progress) * (FRAME_COUNT - 1);
+        if (Math.ceil(target) > readyUpTo) {
+          stalled += time - prevTime;
+          progress = Math.min((time - startTime - stalled) / INTRO_DURATION_MS, 1);
+          target = Math.min(easeInOutQuad(progress) * (FRAME_COUNT - 1), readyUpTo);
+        }
+        prevTime = time;
+        state.framePos = target;
+        state.baseFrame = Math.floor(target);
         repaint();
         if (progress < 1) {
           rafId = requestAnimationFrame(tick);
@@ -487,16 +519,20 @@ export default function Hero() {
     // (~2fps) que se ve apenas arranca el giro hasta que el cache de
     // decodificación se calienta.
     const decoded: boolean[] = [];
+    // último frame tal que 0..readyUpTo están todos decodificados
+    let readyUpTo = -1;
+    const dir = window.innerWidth < MOBILE_MAX_WIDTH ? "/frames/m" : "/frames";
     const framePromises: Promise<void>[] = [];
     for (let i = 0; i < FRAME_COUNT; i++) {
       const img = new Image();
-      img.src = FRAME_SRC(i);
+      img.src = FRAME_SRC(dir, i);
       frames.push(img);
       framePromises.push(
         img
           .decode()
           .then(() => {
             decoded[i] = true;
+            while (decoded[readyUpTo + 1]) readyUpTo++;
             if (i === 0) repaint();
           })
           .catch(() => {})
