@@ -3,9 +3,11 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 
-// Frames 0..91 del video 4K de HeyGen (ver scripts/process-hero-frames.mjs):
-// frente del lente → giro → pantalla LCD de frente.
-const FRAME_COUNT = 92;
+// 181 frames a 1920 px (ver scripts/process-hero-frames.mjs): los frames 0..91
+// del video 4K de HeyGen (frente del lente → LCD de frente) interpolados a 48 fps
+// con compensación de movimiento; el último es el frame 91 original exacto
+// (SCREEN_RECT y los rótulos están calibrados sobre él).
+const FRAME_COUNT = 181;
 const INTRO_DURATION_MS = 7000;
 const FRAME_SRC = (i: number) => `/frames/${String(i).padStart(3, "0")}.webp`;
 
@@ -58,7 +60,8 @@ const GALLERY_BUTTON = { cx: 0.682, cy: 0.875, r: 0.0125, label: "VER GALERÍA" 
 // El giro arranca en cuanto están decodificados los primeros frames; el resto
 // sigue bajando mientras la cámara gira (antes se esperaba a los 92 → ~2 s en
 // negro). Si un frame aún no llegó, repaint() dibuja el último decodificado.
-const START_READY = 12;
+const START_READY = 24;
+const BLEND = 0.5;
 const EDGE_FADE_FRACTION = 0.24; // del lado menor de la imagen dibujada (0.16 con el clip oscuro anterior)
 // Velo uniforme sobre el video para acercar su fondo de estudio (más claro)
 // al color de la página sin apagar la cámara. Calibrado visualmente.
@@ -194,9 +197,11 @@ export default function Hero() {
       );
       ctx.drawImage(baseImg, t.dx, t.dy, t.drawW, t.drawH);
 
-      // Fundido con el frame siguiente según la parte decimal de framePos.
+      // Fundido con el frame siguiente según la parte decimal de framePos. Con
+      // frames interpolados a 48 fps la mezcla va a la mitad: suaviza el paso sin
+      // que se vea la estela que tenía a plena intensidad con 92 frames.
       if (!state.showSlide) {
-        const frac = state.framePos - f;
+        const frac = (state.framePos - f) * BLEND;
         const next = frames[f + 1];
         if (frac > 0.02 && decoded[f + 1] && next) {
           ctx.globalAlpha = frac;
