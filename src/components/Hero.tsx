@@ -44,6 +44,12 @@ const LABELS = [
   { text: "REFLEXCAM", x0: 0.512, y0: 0.441, x1: 0.557, y1: 0.468 },
   { text: "MENU", x0: 0.582, y0: 0.441, x1: 0.621, y1: 0.468 },
 ];
+// Los dos botones redondos grandes ("AFON" deformado) — centro y radio en
+// fracciones del frame (el radio, del ancho). Como en una Sony real: AF-ON y AEL.
+const ROUND_LABELS = [
+  { text: "AF-ON", cx: 0.671, cy: 0.458, r: 0.016 },
+  { text: "AEL", cx: 0.674, cy: 0.545, r: 0.016 },
+];
 const EDGE_FADE_FRACTION = 0.24; // del lado menor de la imagen dibujada (0.16 con el clip oscuro anterior)
 // Velo uniforme sobre el video para acercar su fondo de estudio (más claro)
 // al color de la página sin apagar la cámara. Calibrado visualmente.
@@ -255,6 +261,24 @@ export default function Hero() {
           ctx.font = `700 ${size}px Montserrat, Arial, sans-serif`;
         }
         ctx.fillText(l.text, x + w / 2, y + h / 2 + size * 0.05);
+      }
+      for (const l of ROUND_LABELS) {
+        const cx = t.dx + l.cx * t.drawW;
+        const cy = t.dy + l.cy * t.drawH;
+        const r = l.r * t.drawW;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fillStyle = "rgb(26, 26, 26)";
+        ctx.fill();
+        ctx.lineWidth = Math.max(1, r * 0.08);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.14)";
+        ctx.stroke();
+        ctx.fillStyle = "rgba(232, 232, 232, 0.92)";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        const size = r * 0.5;
+        ctx.font = `700 ${size}px Montserrat, Arial, sans-serif`;
+        ctx.fillText(l.text, cx, cy + size * 0.05);
       }
       ctx.restore();
     }
