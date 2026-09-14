@@ -14,7 +14,7 @@ export default function Footer() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            WHATSAPP +57 311 791 8439
+            WHATSAPP +57 321 662 1901
           </a>
           <div className="text-on-surface-variant">
             © 2026 REFLEXCAM PHOTOGRAPHY. TODOS LOS DERECHOS RESERVADOS.
