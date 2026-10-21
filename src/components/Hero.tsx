@@ -523,10 +523,11 @@ export default function Hero() {
     let readyUpTo = -1;
     const dir = window.innerWidth < MOBILE_MAX_WIDTH ? "/frames/m" : "/frames";
     const framePromises: Promise<void>[] = [];
-    for (let i = 0; i < FRAME_COUNT; i++) {
+    // Con movimiento reducido solo se baja el último cuadro (la imagen fija).
+    for (let i = reducedMotion ? FRAME_COUNT - 1 : 0; i < FRAME_COUNT; i++) {
       const img = new Image();
       img.src = FRAME_SRC(dir, i);
-      frames.push(img);
+      frames[i] = img;
       framePromises.push(
         img
           .decode()
@@ -550,14 +551,16 @@ export default function Hero() {
     });
     function loadSlides() {
       const slidePromises: Promise<void>[] = [];
-      for (let i = 0; i < POOL_SIZE; i++) {
+      // la imagen fija solo muestra las fotos de la primera tanda del grid
+      const count = reducedMotion ? GRID_CELLS : POOL_SIZE;
+      for (let i = 0; i < count; i++) {
         const img = new Image();
         img.src = SLIDE_SRC(i);
         slides.push(img);
         slidePromises.push(img.decode().catch(() => {}));
       }
       Promise.all(slidePromises).then(() => {
-        if (!cancelled && reducedMotion) repaint();
+        if (!cancelled && reducedMotion) showStill();
         resolveSlides();
       });
     }
@@ -570,15 +573,19 @@ export default function Hero() {
     Promise.all(framePromises).then(() => {
       if (cancelled) return;
       loadSlides();
-      if (reducedMotion) {
-        state.baseFrame = FRAME_COUNT - 1;
-        state.showSlide = true;
-        cells.forEach((cell) => {
-          cell.appearAlpha = 1;
-        });
-        repaint();
-      }
     });
+
+    // Movimiento reducido: una sola imagen fija (último cuadro + grid) que entra
+    // con un fundido de opacidad de 300 ms, sin giro ni desplazamientos.
+    function showStill() {
+      state.baseFrame = FRAME_COUNT - 1;
+      state.showSlide = true;
+      cells.forEach((cell) => {
+        cell.appearAlpha = 1;
+      });
+      repaint();
+      canvas.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: "ease-out" });
+    }
 
     window.addEventListener("resize", handleResize);
 
