@@ -631,7 +631,7 @@ export default function Hero() {
             </p>
           </div>
           <div className="text-right">
-            <p className="text-headline-md tracking-tight text-primary">REFLEXCAM</p>
+            <h1 className="text-headline-md tracking-tight text-primary">REFLEXCAM</h1>
             <p className="text-label-mono text-outline uppercase tracking-widest mt-1">
               Nunca pierdas un momento
             </p>
