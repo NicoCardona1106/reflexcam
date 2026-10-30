@@ -11,5 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     })),
     { url: `${SITE_URL}/sobre-mi`, priority: 0.8 },
+    { url: `${SITE_URL}/privacidad`, priority: 0.3 },
+    { url: `${SITE_URL}/terminos`, priority: 0.3 },
   ];
 }

@@ -4,7 +4,7 @@ export default function Footer() {
   return (
     <footer
       id="contacto"
-      className="bg-background w-full py-unit-lg border-t border-outline-variant/10 text-primary text-label-mono relative z-20"
+      className="bg-background w-full pt-unit-lg pb-24 md:pb-unit-lg border-t border-outline-variant/10 text-primary text-label-mono relative z-20"
     >
       <div className="flex flex-col md:flex-row justify-between items-center px-margin-mobile md:px-margin-desktop gap-unit-md max-w-container-max mx-auto">
         <div className="flex flex-col items-center md:items-start gap-unit-xs">
@@ -32,7 +32,7 @@ export default function Footer() {
             ).
           </div>
         </div>
-        <div className="flex gap-unit-md">
+        <div className="flex flex-wrap justify-center gap-unit-md">
           <a
             className="text-on-surface-variant hover:text-primary transition-colors duration-150"
             href="/sobre-mi"
@@ -54,6 +54,18 @@ export default function Footer() {
             rel="noopener noreferrer"
           >
             TikTok
+          </a>
+          <a
+            className="text-on-surface-variant hover:text-primary transition-colors duration-150"
+            href="/privacidad"
+          >
+            Política de privacidad
+          </a>
+          <a
+            className="text-on-surface-variant hover:text-primary transition-colors duration-150"
+            href="/terminos"
+          >
+            Términos
           </a>
         </div>
       </div>
