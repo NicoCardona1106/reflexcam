@@ -98,7 +98,11 @@ Cada push a `master` se despliega solo en Vercel. Para probar algo sin publicarl
 
 ## Créditos
 
-- **Juan Esteban Hurtado**: fotografía, video y dirección creativa.
-- **Nicolas Cardona**: diseño y desarrollo web.
+Este sitio es un trabajo en colaboración entre:
+
+- **Juan Esteban Hurtado** ([@Juanes3324](https://github.com/Juanes3324)): fotografía, video y dirección creativa.
+- **Nicolas Cardona** ([@NicoCardona1106](https://github.com/NicoCardona1106)): diseño y desarrollo web.
+
+Además de ser el sitio oficial de Reflexcam, el proyecto hace parte del trabajo final universitario de Juan Esteban Hurtado.
 
 © 2026 Reflexcam Photography. Las fotos del portafolio y de «Sobre mí» son de Reflexcam y no se pueden usar sin permiso.
