@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
 
-## Getting Started
+<img src="public/og.jpg" alt="Reflexcam Photography" width="720">
 
-First, run the development server:
+# Reflexcam Photography
+
+**Fotografía, video y diseño que hacen que tu marca se recuerde.**
+
+[reflexcamph.com](https://reflexcamph.com) · Pereira, Colombia
+
+![Next.js](https://img.shields.io/badge/Next.js-16-000?logo=nextdotjs)
+![React](https://img.shields.io/badge/React-19-149eca?logo=react&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38bdf8?logo=tailwindcss&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-desplegado-000?logo=vercel)
+
+</div>
+
+---
+
+## Qué hay en el sitio
+
+| Ruta | Qué muestra |
+|---|---|
+| `/` | Portada con la cámara que gira (secuencia de fotogramas), últimos trabajos, equipo y contacto |
+| `/portafolio` | Galería completa, filtrable por categoría (`/portafolio/retratos`, `/urbano`, `/lifestyle`…) |
+| `/sobre-mi` | Quién está detrás de Reflexcam, servicios y contacto directo por WhatsApp |
+| `/privacidad` · `/terminos` | Política de tratamiento de datos (Ley 1581) y términos |
+
+Todo es estático: no hay base de datos ni variables de entorno obligatorias.
+
+## Correrlo en tu equipo
+
+Necesitas Node.js 20 o superior.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm ci        # instala las dependencias exactas del package-lock
+npm run dev   # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Antes de subir cambios, comprueba que compile:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Cambios frecuentes
 
-## Learn More
+### Agregar fotos al portafolio
 
-To learn more about Next.js, take a look at the following resources:
+1. Convierte la foto a **WebP de máximo 1600 px** y guárdala en `public/portafolio/` (por ejemplo `retratos-05.webp`).
+2. Agrega su entrada en [`src/lib/portafolio.ts`](src/lib/portafolio.ts):
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```ts
+   {
+     src: "/portafolio/retratos-05.webp",
+     width: 1600,
+     height: 1067,
+     categoria: "retratos",
+     alt: "Describe lo que se ve en la foto",
+     fecha: "2026-11-20", // día en que se entregó; las 10 más recientes salen en «Últimos trabajos»
+   },
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Las categorías disponibles están al inicio del mismo archivo.
 
-## Deploy on Vercel
+### Cambiar la foto de «Sobre mí»
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Reemplaza `public/sobre-mi/juan.webp` por la nueva, con el mismo nombre. Funciona mejor una foto vertical; la página la pasa a blanco y negro con el degradado.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Número de WhatsApp y dominio
+
+Ambos viven en [`src/lib/site.ts`](src/lib/site.ts). Todos los botones de contacto del sitio salen de ahí.
+
+### Textos y servicios
+
+- Portada: componentes en [`src/components/`](src/components/) (`Hero`, `UltimosTrabajos`, `Equipo`, `Footer`…).
+- Sobre mí y servicios: [`src/app/sobre-mi/page.tsx`](src/app/sobre-mi/page.tsx).
+- Colores, tipografía y espaciados: tokens en [`src/app/globals.css`](src/app/globals.css).
+
+## Estructura
+
+```
+public/
+  frames/       fotogramas de la cámara del hero (escritorio y móvil)
+  portafolio/   fotos de la galería (WebP)
+  sobre-mi/     foto de la página Sobre mí
+  equipo/       fotos del equipo fotográfico (cámara, dron, estabilizador…)
+scripts/        herramientas para procesar fotos y fotogramas (ffmpeg / sharp)
+src/
+  app/          páginas (App Router de Next.js)
+  components/   piezas de la interfaz
+  lib/          datos del sitio: fotos del portafolio, WhatsApp y dominio
+```
+
+## Publicar
+
+Cada push a `master` se despliega solo en Vercel. Para probar algo sin publicarlo, súbelo a otra rama: Vercel genera una vista previa con su propio enlace.
+
+## Créditos
+
+- **Juan Esteban Hurtado**: fotografía, video y dirección creativa.
+- **Nicolas Cardona**: diseño y desarrollo web.
+
+© 2026 Reflexcam Photography. Las fotos del portafolio y de «Sobre mí» son de Reflexcam y no se pueden usar sin permiso.
