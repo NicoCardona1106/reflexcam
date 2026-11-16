@@ -104,12 +104,14 @@ export default function SobreMiPage() {
       <main className="flex-1">
         {/* Portada: foto a la derecha que se funde con el fondo */}
         <section className="relative overflow-hidden border-b border-outline-variant/30 pt-16">
-          <div className="absolute inset-0 md:left-auto md:w-[58%]">
+          {/* ponytail: foto provisional de 720 px (llegó por WhatsApp); ancho tope para no estirarla. Con la original, quitar max-w y unoptimized. */}
+          <div className="absolute inset-0 md:left-auto md:w-[58%] md:max-w-[720px]">
             <Image
               src="/sobre-mi/juan.webp"
               alt="Juan Esteban Hurtado, fundador de Reflexcam Photography"
               fill
               priority
+              unoptimized
               sizes="(min-width: 768px) 58vw, 100vw"
               className="object-cover object-[50%_0%]"
             />
@@ -117,7 +119,7 @@ export default function SobreMiPage() {
           </div>
 
           <div className="relative max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop pt-64 pb-unit-xl md:py-28 lg:py-32">
-            <p className={ETIQUETA}>Conoce más sobre</p>
+            <p className={ETIQUETA}>Detrás de la cámara</p>
             <h1 className="text-headline-lg-mobile text-[44px] md:text-headline-xl md:text-[88px] text-primary uppercase mt-unit-sm">
               Sobre mí
             </h1>
